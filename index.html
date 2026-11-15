@@ -801,6 +801,7 @@
     </div>
 
     <div style="display:flex; gap:8px; align-items:center;">
+      <button id="btnCloud" class="btn-secondary btn-sm" aria-label="Conta e backup na nuvem" title="Conta e backup">☁ <span id="cloudDot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#6b7280;margin-left:2px"></span></button>
       <span id="saveIndicator" style="font-size:0.72rem; color:#34d399; display:none;">● Salvo</span>
       <button id="btnHeaderHome" class="btn-secondary btn-sm hidden">← Início</button>
     </div>
@@ -1032,6 +1033,7 @@
             <option value="neon">Neon Borda</option>
             <option value="solid">Card Sólido</option>
             <option value="striped">Zebrada</option>
+            <option value="guild">Guilda (faixas inclinadas)</option>
             <option value="minimal">Minimalista</option>
           </select>
         </div>
@@ -1352,6 +1354,7 @@
           } else {
             localStorage.removeItem(ACTIVE_ID_KEY);
           }
+          try { if (window.SilvaCloud) window.SilvaCloud.changed(); } catch (e) {}
           const ind = document.getElementById("saveIndicator");
           if (ind && activeSheetId) {
             ind.style.display = "inline";
@@ -1376,9 +1379,21 @@
         return sheets.find(s => s.id === activeSheetId) || null;
       }
 
+      // Ponte para o módulo de backup em nuvem
+      window.SilvaApp = {
+        getSheets() { return sheets; },
+        setSheets(arr, changedIds) {
+          const wasActive = activeSheetId && (changedIds || []).includes(activeSheetId);
+          sheets = arr;
+          if (activeSheetId && !sheets.some(x => x.id === activeSheetId)) activeSheetId = null;
+          if (wasActive || !activeSheetId) showHomeView(); else saveToStorage();
+        }
+      };
+
       function createSheetObject(templateObj) {
         const tpl = templateObj || TEMPLATES[0];
         const themeColors = VISUAL_THEMES[tpl.theme] || VISUAL_THEMES.purple;
+        const guild = tpl.id === "guerra-guilda";
         return {
           id: generateId(),
           title: tpl.defaultTitle,
@@ -1388,13 +1403,13 @@
           players: [],
           visual: {
             theme: tpl.theme,
-            bgColor: themeColors.bg,
+            bgColor: guild ? "#07040d" : themeColors.bg,
             accentColor: themeColors.accent,
             textColor: themeColors.text,
             posColor: themeColors.pos,
             scoreColor: themeColors.score,
             bgType: themeColors.bgType,
-            rowStyle: themeColors.rowStyle,
+            rowStyle: guild ? "guild" : themeColors.rowStyle,
             headerStyle: "banner",
             fontSizePercent: 100,
             rowSpacing: 12,
@@ -1948,7 +1963,107 @@
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
       }
 
+      /* ESTILO "GUILDA": faixas inclinadas, bandeiras e coroa (referência Guerra de Guilda) */
+      function renderGuildToCanvas(cv, sheet, sf) {
+        const st = computeRankings(sheet), v = sheet.visual, fmt = sheet.exportFormat || "vertical";
+        const W = 1080, px = 78, cw = W - px * 2, A = v.accentColor, fs = (v.fontSizePercent || 100) / 100;
+        const rh = Math.round(60 * Math.max(0.9, fs)), gap = Math.max(4, Math.min(Number(v.rowSpacing ?? 8), 14));
+        const n = Math.max(1, st.items.length), headH = 250, totH = v.showTotal ? 110 : 20;
+        const nat = 40 + headH + n * rh + (n - 1) * gap + 34 + totH + 50;
+        const H = fmt === "square" ? Math.max(1080, nat) : fmt === "stories" ? Math.max(1920, nat) : nat;
+        cv.width = W * sf; cv.height = H * sf;
+        const c = cv.getContext("2d"); c.save(); c.scale(sf, sf); c.textBaseline = "middle";
+        const ff = 'system-ui, -apple-system, "Segoe UI", Roboto, "Noto Color Emoji", "Apple Color Emoji", sans-serif';
+        const poly = p => { c.beginPath(); p.forEach((q, i) => i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1])); c.closePath(); };
+        const para = (x, y, w, h, s) => poly([[x + s, y], [x + w, y], [x + w - s, y + h], [x, y + h]]);
+        const oct = (x0, x1, ya, yb, k) => poly([[x0 + k, ya], [x1 - k, ya], [x1, ya + k], [x1, yb - k], [x1 - k, yb], [x0 + k, yb], [x0, yb - k], [x0, ya + k]]);
+        const glow = (on, col) => { c.shadowColor = col || A; c.shadowBlur = on ? 16 * sf : 0; };
+        // fundo escuro com brilhos roxos
+        c.fillStyle = v.bgColor; c.fillRect(0, 0, W, H);
+        [[W / 2, 60, 620, 0.28], [0, H, 560, 0.34], [W, H * 0.85, 520, 0.22]].forEach(g => {
+          const r = c.createRadialGradient(g[0], g[1], 20, g[0], g[1], g[2]);
+          r.addColorStop(0, hexToRgba(A, g[3])); r.addColorStop(1, "rgba(0,0,0,0)");
+          c.fillStyle = r; c.fillRect(0, 0, W, H);
+        });
+        const vg = c.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.85);
+        vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.55)");
+        c.fillStyle = vg; c.fillRect(0, 0, W, H);
+
+        const y0 = 40 + Math.floor((H - nat) / 2);
+        const crown = (cx, cy, s) => {
+          const p = [[-1, 0.6], [-1, -0.4], [-0.5, 0.1], [0, -0.8], [0.5, 0.1], [1, -0.4], [1, 0.6]].map(q => [cx + q[0] * s, cy + q[1] * s]);
+          glow(true); poly(p);
+          const g = c.createLinearGradient(0, cy - s, 0, cy + s);
+          g.addColorStop(0, v.posColor); g.addColorStop(1, hexToRgba(A, 0.9));
+          c.fillStyle = g; c.fill(); glow(false);
+        };
+        // bandeiras laterais
+        [[62, 1], [W - 62, -1]].forEach(f => {
+          const fx = f[0], d = f[1], bt = y0 + 60, bb = y0 + 215;
+          c.strokeStyle = "#7a5c3a"; c.lineWidth = 6; c.beginPath(); c.moveTo(fx, y0 + 15); c.lineTo(fx, y0 + 235); c.stroke();
+          poly([[fx, bt], [fx + d * 112, bt + 12], [fx + d * 112, bb], [fx + d * 56, bb - 26], [fx, bb]]);
+          const g = c.createLinearGradient(fx, bt, fx + d * 112, bb);
+          g.addColorStop(0, hexToRgba(A, 0.45)); g.addColorStop(1, "#0d0716");
+          c.fillStyle = g; c.fill(); c.strokeStyle = hexToRgba(A, 0.7); c.lineWidth = 2; c.stroke();
+          crown(fx + d * 56, bt + 62, 24);
+        });
+        // painel do título
+        const x0 = 190, x1 = W - 190, ya = y0 + 28, yb = y0 + headH - 8;
+        crown(W / 2, y0 + 8, 30);
+        glow(true); oct(x0, x1, ya, yb, 34);
+        c.fillStyle = "rgba(6,3,12,0.94)"; c.fill(); c.strokeStyle = A; c.lineWidth = 3; c.stroke(); glow(false);
+        const raw = (sheet.title || "PLANILHA DE PONTUAÇÃO").toUpperCase();
+        let l1 = "", l2 = raw;
+        if (raw.includes("\n")) { const p = raw.split("\n"); l1 = p[0]; l2 = p.slice(1).join(" "); }
+        else { const w = raw.split(/\s+/); if (w.length >= 4) { let b = 1, bd = 1e9; for (let i = 1; i < w.length; i++) { const d = Math.abs(w.slice(0, i).join(" ").length - w.slice(i).join(" ").length); if (d < bd) { bd = d; b = i; } } l1 = w.slice(0, b).join(" "); l2 = w.slice(b).join(" "); } }
+        const mid = (ya + yb) / 2, iw = x1 - x0 - 90;
+        c.textAlign = "center"; c.direction = isRtlText(raw) ? "rtl" : "ltr";
+        const tg = (y) => { const g = c.createLinearGradient(W / 2 - 300, y, W / 2 + 300, y); g.addColorStop(0, v.posColor); g.addColorStop(1, A); return g; };
+        if (l1) {
+          c.fillStyle = "#fff"; c.font = `italic 900 ${Math.round(52 * fs)}px ${ff}`; c.fillText(l1, W / 2, mid - 44, iw);
+          c.fillStyle = tg(mid + 28); c.font = `italic 900 ${Math.round(74 * fs)}px ${ff}`; c.fillText(l2, W / 2, mid + 28, iw);
+        } else {
+          const sy = sheet.subtitle ? mid - 18 : mid;
+          c.fillStyle = tg(sy); c.font = `italic 900 ${Math.round(74 * fs)}px ${ff}`; c.fillText(l2, W / 2, sy, iw);
+          if (sheet.subtitle) { c.direction = isRtlText(sheet.subtitle) ? "rtl" : "ltr"; c.fillStyle = v.posColor; c.font = `italic 700 ${Math.round(26 * fs)}px ${ff}`; c.fillText(sheet.subtitle.toUpperCase(), W / 2, mid + 50, iw); }
+        }
+        c.direction = "ltr";
+        // linhas
+        let y = y0 + headH + 10;
+        if (!st.items.length) {
+          para(px, y, cw, rh, 14); c.fillStyle = "rgba(6,4,10,0.94)"; c.fill();
+          c.fillStyle = "rgba(255,255,255,0.6)"; c.font = `500 24px ${ff}`; c.fillText("Adicione jogadores no editor", W / 2, y + rh / 2);
+          y += rh;
+        }
+        st.items.forEach((it, i) => {
+          const top1 = i === 0 && it.numScore > 0, cy = y + rh / 2, s = 14;
+          glow(top1); para(px, y, cw, rh, s); c.fillStyle = "rgba(6,4,10,0.95)"; c.fill();
+          c.strokeStyle = hexToRgba(A, top1 ? 1 : 0.55); c.lineWidth = top1 ? 2.5 : 1.5; c.stroke(); glow(false);
+          para(px + cw - 240, y, 240, rh, s); c.fillStyle = hexToRgba(A, 0.2); c.fill(); c.strokeStyle = hexToRgba(A, 0.85); c.lineWidth = 1.5; c.stroke();
+          para(px, y, 122, rh, s); const g = c.createLinearGradient(px, y, px + 122, y + rh);
+          g.addColorStop(0, hexToRgba(A, 0.95)); g.addColorStop(1, hexToRgba(A, 0.5)); c.fillStyle = g; c.fill();
+          const dp = String(it.displayPos), lab = /^\d+$/.test(dp) ? dp.padStart(2, "0") + "." : dp;
+          c.textAlign = "center"; c.fillStyle = "#f5eaff"; c.font = `italic 900 ${Math.round(30 * fs)}px ${ff}`; c.fillText(lab, px + 64, cy + 1, 100);
+          c.textAlign = "left"; c.direction = isRtlText(it.nick) ? "rtl" : "ltr"; c.fillStyle = v.textColor;
+          c.font = `600 ${Math.round(30 * fs)}px ${ff}`; c.fillText(it.nick, px + 150, cy + 1, cw - 150 - 262);
+          c.direction = "ltr"; c.textAlign = "center"; c.fillStyle = v.scoreColor; c.font = `italic 800 ${Math.round(30 * fs)}px ${ff}`;
+          c.fillText(formatScore(it.numScore) + " pts", px + cw - 118, cy + 1, 196);
+          y += rh + gap;
+        });
+        y += 34 - gap;
+        if (v.showTotal) {
+          glow(true); oct(W / 2 - 310, W / 2 + 310, y, y + 78, 24);
+          c.fillStyle = "rgba(6,3,12,0.94)"; c.fill(); c.strokeStyle = A; c.lineWidth = 3; c.stroke(); glow(false);
+          c.textAlign = "center"; c.fillStyle = "#f5eaff"; c.font = `italic 900 40px ${ff}`;
+          c.fillText(`TOTAL: ${formatScore(st.totalPoints)} PONTOS`, W / 2, y + 40, 560);
+        }
+        c.textAlign = "center"; c.fillStyle = "rgba(255,255,255,0.3)"; c.font = `600 15px ${ff}`;
+        c.fillText("SILVA PLANILHAS", W / 2, H - 26);
+        c.restore();
+      }
+
       function renderSheetToCanvas(targetCanvas, sheet, scaleFactor = 2) {
+        if ((sheet.visual || {}).rowStyle === "guild") return renderGuildToCanvas(targetCanvas, sheet, scaleFactor);
         const stats = computeRankings(sheet);
         const v = sheet.visual;
         const format = sheet.exportFormat || "vertical";
@@ -2554,5 +2669,227 @@
       });
     })();
   </script>
+<script type="module">
+/* ===== SILVA PLANILHAS · Backup em nuvem (Firebase Auth + Firestore) ===== */
+const CFG = {
+  apiKey: "AIzaSyCrEDn8i7MnTeicI_aS9Zf4BpnuENtWSFY",
+  authDomain: "silva-planilhas.firebaseapp.com",
+  projectId: "silva-planilhas",
+  storageBucket: "silva-planilhas.firebasestorage.app",
+  messagingSenderId: "138959113431",
+  appId: "1:138959113431:web:7c6101c964562992763492"
+};
+const SDK = "https://www.gstatic.com/firebasejs/10.12.2/";
+const MK = "silva_cloud_meta_v1", UK = "silva_cloud_last_uid", DK = "silva_device_id";
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const App = () => window.SilvaApp;
+const DEV = localStorage.getItem(DK) || (() => { const d = "d_" + Math.random().toString(36).slice(2, 10); localStorage.setItem(DK, d); return d; })();
+let Au, F, auth, db, user = null, busy = false, lastErr = "", sdkFail = false, timer = null, retries = 0, msg = "", ask = false;
+
+/* ---- metadados locais por usuário: base (versão conhecida na nuvem), hash (último estado sincronizado), dels (exclusões pendentes) ---- */
+const allMeta = () => { try { return JSON.parse(localStorage.getItem(MK)) || {}; } catch (e) { return {}; } };
+const getM = () => { const m = allMeta()[user.uid] || {}; return { base: m.base || {}, hash: m.hash || {}, dels: m.dels || {}, last: m.last || 0 }; };
+const putM = m => { const a = allMeta(); a[user.uid] = m; localStorage.setItem(MK, JSON.stringify(a)); };
+const hsh = s => {
+  const t = JSON.stringify(s, (k, v) => k === "updatedAt" ? undefined : v);
+  let a = 0xdeadbeef, b = 0x41c6ce57;
+  for (let i = 0, c; i < t.length; i++) { c = t.charCodeAt(i); a = Math.imul(a ^ c, 2654435761); b = Math.imul(b ^ c, 1597334677); }
+  a = Math.imul(a ^ (a >>> 16), 2246822507) ^ Math.imul(b ^ (b >>> 13), 3266489909);
+  b = Math.imul(b ^ (b >>> 16), 2246822507) ^ Math.imul(a ^ (a >>> 13), 3266489909);
+  return (4294967296 * (2097151 & b) + (a >>> 0)).toString(36) + ":" + t.length;
+};
+const gid = () => "sp_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+function pending() {
+  if (!user || !App()) return 0;
+  const m = getM();
+  return App().getSheets().filter(s => m.hash[s.id] !== hsh(s)).length + Object.keys(m.dels).length;
+}
+
+/* ---- status / indicadores ---- */
+const COL = { ok: "#10b981", sync: "#3b82f6", pend: "#f59e0b", off: "#9ca3af", err: "#ef4444", out: "#6b7280" };
+function state() {
+  if (!user) return sdkFail ? ["off", "Firebase não carregou (sem internet?)"] : ["out", "Sem conta conectada"];
+  if (lastErr) return ["err", "Erro de sincronização"];
+  if (busy) return ["sync", "Sincronizando…"];
+  const p = pending();
+  if (!navigator.onLine) return ["off", "Sem conexão" + (p ? " · " + p + " pendente(s)" : "")];
+  return p ? ["pend", p + " alteração(ões) pendente(s)"] : ["ok", "Sincronizado"];
+}
+function paint() {
+  const [k, t] = state(), d = $("cloudDot"), b = $("btnCloud");
+  if (d) d.style.background = COL[k];
+  if (b) b.title = t;
+  const p = $("cloudPanel");
+  if (p && p.classList.contains("open")) render();
+}
+function errTxt(e) {
+  const c = (e && e.code) || "";
+  if (/permission-denied/.test(c)) return "Permissão negada pelo Firestore. Publique as regras de segurança e confirme que você está logado.";
+  if (/not-found|failed-precondition/.test(c)) return "O Cloud Firestore ainda não foi criado/ativado no projeto silva-planilhas.";
+  if (/unavailable|network/.test(c)) return "Sem conexão com o Firebase.";
+  if (c === "auth/operation-not-allowed") return "Ative o login por E-mail/Senha no Firebase Authentication.";
+  if (c === "auth/email-already-in-use") return "Este e-mail já tem conta. Use Entrar.";
+  if (/invalid-credential|wrong-password|user-not-found/.test(c)) return "E-mail ou senha incorretos.";
+  if (c === "auth/weak-password") return "Senha fraca (mínimo 6 caracteres).";
+  if (c === "auth/invalid-email") return "E-mail inválido.";
+  if (c === "auth/too-many-requests") return "Muitas tentativas. Aguarde um pouco.";
+  if (e && e.message === "conflict") return "conflict";
+  return "Erro: " + (c || (e && e.message) || e);
+}
+
+/* ---- motor de sincronização com controle de versão (rev) ---- */
+async function sync(opt) {
+  opt = opt || {};
+  if (!user || !App() || busy) return { ok: false };
+  if (!navigator.onLine) { paint(); return { ok: false }; }
+  busy = true; lastErr = ""; paint();
+  let fail = 0, conflict = false;
+  try {
+    const col = F.collection(db, "users", user.uid, "sheets");
+    const snap = await F.getDocsFromServer(col);
+    const remote = {}; snap.forEach(d => { remote[d.id] = d.data(); });
+    let m = getM(); const sheets = App().getSheets().slice(); const changed = new Set();
+    if (opt.force) sheets.forEach(s => { delete m.hash[s.id]; });
+    for (const id in remote) {
+      const r = remote[id];
+      if (opt.overwrite && r.deleted) continue;
+      if (!opt.overwrite && (m.base[id] || 0) >= r.rev) continue;
+      const i = sheets.findIndex(s => s.id === id), loc = sheets[i];
+      const dirty = !opt.overwrite && loc && m.hash[id] !== hsh(loc);
+      if (r.deleted) {
+        if (loc && !dirty) { sheets.splice(i, 1); delete m.hash[id]; changed.add(id); }
+        m.base[id] = r.rev; delete m.dels[id]; continue;
+      }
+      const data = JSON.parse(r.json);
+      if (dirty) { // edição local não enviada + versão nova na nuvem: nada é perdido, a local vira cópia
+        const cp = { ...loc, id: gid(), title: (loc.title || "") + " (conflito)", updatedAt: Date.now() };
+        sheets.push(cp); changed.add(cp.id);
+      }
+      delete m.dels[id];
+      if (loc) sheets[i] = data; else sheets.unshift(data);
+      m.base[id] = r.rev; m.hash[id] = hsh(data); changed.add(id);
+    }
+    putM(m);
+    if (changed.size) App().setSheets(sheets, [...changed]);
+    // enviar o que está pendente
+    m = getM();
+    const jobs = [];
+    App().getSheets().forEach(s => { const h = hsh(s); if (m.hash[s.id] !== h) jobs.push({ id: s.id, s: JSON.parse(JSON.stringify(s)), h }); });
+    Object.keys(m.dels).forEach(id => jobs.push({ id, del: true }));
+    for (const j of jobs) {
+      try {
+        const ref = F.doc(db, "users", user.uid, "sheets", j.id), base = getM().base[j.id] || 0;
+        const rev = await F.runTransaction(db, async t => {
+          const sn = await t.get(ref), cur = sn.exists() ? sn.data().rev : 0;
+          if (cur !== base) throw new Error("conflict");
+          const nr = cur + 1;
+          t.set(ref, j.del
+            ? { rev: nr, deleted: true, json: "", updatedAt: F.serverTimestamp(), device: DEV }
+            : { rev: nr, deleted: false, json: JSON.stringify(j.s), title: String(j.s.title || ""), players: (j.s.players || []).length, updatedAt: F.serverTimestamp(), device: DEV });
+          return nr;
+        });
+        const mm = getM(); mm.base[j.id] = rev;
+        if (j.del) { delete mm.dels[j.id]; delete mm.hash[j.id]; } else mm.hash[j.id] = j.h;
+        putM(mm);
+      } catch (e) { fail++; if (e && e.message === "conflict") conflict = true; else lastErr = errTxt(e); }
+    }
+    if (!fail) { const mm = getM(); mm.last = Date.now(); putM(mm); retries = 0; }
+  } catch (e) { fail++; lastErr = errTxt(e); }
+  busy = false;
+  if (conflict && !lastErr && retries < 3) { retries++; setTimeout(() => sync(), 800); }
+  else if (conflict && !lastErr) lastErr = "Conflito persistente. Tente o backup manual.";
+  else if (!lastErr && pending()) sched();
+  paint();
+  return { ok: !fail && !lastErr };
+}
+const sched = () => { clearTimeout(timer); timer = setTimeout(() => sync(), 1500); };
+function changed() {
+  if (!user || !App()) return;
+  const m = getM(), ids = new Set(App().getSheets().map(s => s.id));
+  Object.keys(m.hash).forEach(id => { if (!ids.has(id)) m.dels[id] = 1; });
+  putM(m); paint(); sched();
+}
+window.SilvaCloud = { changed, sync };
+
+/* ---- painel: conta + central de backup ---- */
+const IN = "width:100%;margin:6px 0;padding:11px;border-radius:10px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-main);font-size:1rem;";
+function render() {
+  const [k, t] = state(), m = user ? getM() : null;
+  let h = '<h3 class="modal-title">☁ Conta e backup</h3><div class="modal-body">';
+  h += '<p style="display:flex;align-items:center;gap:8px;margin:0 0 8px"><span style="width:10px;height:10px;border-radius:50%;background:' + COL[k] + '"></span>' + esc(t) + '</p>';
+  if (!user) {
+    h += '<input id="cEmail" type="email" autocomplete="email" placeholder="E-mail" style="' + IN + '"><input id="cPass" type="password" autocomplete="current-password" placeholder="Senha (mín. 6 caracteres)" style="' + IN + '">';
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn-primary" data-a="login">Entrar</button><button class="btn-secondary" data-a="signup">Criar conta</button><button class="btn-secondary" data-a="reset">Esqueci a senha</button></div>';
+  } else {
+    h += '<p style="margin:4px 0;font-size:.85rem;color:var(--text-muted)">Conta: ' + esc(user.email || user.uid) + '<br>Conexão: ' + (navigator.onLine ? "online" : "offline") + '<br>Último backup confirmado: ' + (m.last ? new Date(m.last).toLocaleString("pt-BR") : "nenhum ainda") + '<br>Alterações pendentes: ' + pending() + '</p>';
+    if (ask) h += '<p style="color:#fbbf24">Restaurar substitui, neste aparelho, as planilhas que existem na nuvem pela versão da nuvem (planilhas só locais são mantidas). Confirmar?</p><div style="display:flex;gap:8px"><button class="btn-danger" data-a="restoreOk">Confirmar restauração</button><button class="btn-secondary" data-a="cancel">Cancelar</button></div>';
+    else h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn-primary" data-a="backup">Fazer backup agora</button><button class="btn-secondary" data-a="restore">Restaurar da nuvem</button><button class="btn-secondary" data-a="logout">Sair</button></div>';
+  }
+  if (msg) h += '<p style="margin-top:10px;font-size:.85rem;color:' + (/^✓/.test(msg) ? "#34d399" : "#fca5a5") + '">' + esc(msg) + '</p>';
+  h += '</div><div class="modal-actions"><button class="btn-secondary" data-a="close">Fechar</button></div>';
+  const keep = [$("cEmail") && $("cEmail").value, $("cPass") && $("cPass").value];
+  $("cloudBox").innerHTML = h;
+  if ($("cEmail")) { $("cEmail").value = keep[0] || ""; $("cPass").value = keep[1] || ""; }
+}
+async function act(a) {
+  try {
+    if (a === "close") { $("cloudPanel").classList.remove("open"); return; }
+    if (!auth && a !== "cancel") { msg = "Firebase não carregou. Conecte-se à internet e reabra o app."; render(); return; }
+    const em = $("cEmail") && $("cEmail").value.trim(), pw = $("cPass") && $("cPass").value;
+    msg = "";
+    if (a === "login") await Au.signInWithEmailAndPassword(auth, em, pw);
+    else if (a === "signup") await Au.createUserWithEmailAndPassword(auth, em, pw);
+    else if (a === "reset") { await Au.sendPasswordResetEmail(auth, em); msg = "✓ E-mail de recuperação enviado (se a conta existir)."; }
+    else if (a === "logout") { await Au.signOut(auth); }
+    else if (a === "restore") ask = true;
+    else if (a === "cancel") ask = false;
+    else if (a === "backup") {
+      msg = "Enviando…"; render();
+      const r = await sync({ force: true });
+      msg = r.ok ? "✓ Backup confirmado no Firebase às " + new Date().toLocaleTimeString("pt-BR") + "." : (lastErr || "Não foi possível confirmar o backup.");
+    } else if (a === "restoreOk") {
+      ask = false; msg = "Restaurando…"; render();
+      const r = await sync({ overwrite: true });
+      msg = r.ok ? "✓ Restauração concluída." : (lastErr || "Falha ao restaurar.");
+    }
+  } catch (e) { msg = errTxt(e); }
+  render(); paint();
+}
+function buildUI() {
+  const p = document.createElement("div");
+  p.id = "cloudPanel"; p.className = "modal-backdrop";
+  p.innerHTML = '<div class="modal-box" id="cloudBox"></div>';
+  document.body.appendChild(p);
+  p.addEventListener("click", e => { if (e.target === p) return act("close"); const b = e.target.closest("[data-a]"); if (b) act(b.dataset.a); });
+  $("btnCloud").addEventListener("click", () => { msg = ""; ask = false; p.classList.add("open"); render(); });
+}
+
+/* ---- inicialização (o app continua funcionando mesmo se o SDK não carregar) ---- */
+async function onAuth(u) {
+  if (u) {
+    const last = localStorage.getItem(UK);
+    if (last && last !== u.uid && App().getSheets().length && !confirm("Este aparelho tem planilhas de outra conta. Enviá-las também para esta conta?\n\nOK = enviar\nCancelar = sair desta conta")) { await Au.signOut(auth); return; }
+    localStorage.setItem(UK, u.uid);
+    user = u; lastErr = ""; paint(); sync();
+  } else { user = null; paint(); }
+}
+async function init() {
+  try {
+    const [A, a, f] = await Promise.all([import(SDK + "firebase-app.js"), import(SDK + "firebase-auth.js"), import(SDK + "firebase-firestore.js")]);
+    Au = a; F = f;
+    const app = A.getApps().length ? A.getApp() : A.initializeApp(CFG);
+    auth = Au.getAuth(app);
+    try { db = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); }
+    catch (e) { db = F.getFirestore(app); }
+    Au.onAuthStateChanged(auth, onAuth);
+  } catch (e) { sdkFail = true; paint(); }
+}
+buildUI(); paint(); init();
+window.addEventListener("online", () => { paint(); sync(); });
+window.addEventListener("offline", paint);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) sync(); });
+setInterval(() => sync(), 90000);
+</script>
 </body>
 </html>
