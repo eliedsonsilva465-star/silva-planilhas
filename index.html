@@ -1,0 +1,2558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#090612" />
+  <title>SILVA PLANILHAS — Gerador de Planilhas Visuais Gamer</title>
+  <style>
+    /* ==========================================================================
+       1. VARIÁVEIS E IDENTIDADE VISUAL (TEMA DARK GAMER ROXO NEON)
+       ========================================================================== */
+    :root {
+      --bg-app: #090612;
+      --bg-surface: #120d24;
+      --bg-card: #181130;
+      --bg-input: #0e0a1d;
+      --border-subtle: rgba(168, 85, 247, 0.22);
+      --border-strong: rgba(192, 132, 252, 0.55);
+      --neon-primary: #a855f7;
+      --neon-light: #c084fc;
+      --neon-glow: rgba(168, 85, 247, 0.35);
+      --text-main: #ffffff;
+      --text-muted: #b4a9d6;
+      --text-dim: #7c6fa3;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.14);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.45;
+      overflow-x: hidden;
+    }
+
+    /* ==========================================================================
+       2. LAYOUT PRINCIPAL E CABEÇALHO
+       ========================================================================== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(9, 6, 18, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--neon-glow);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff, #d8b4fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: -2px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 84px;
+    }
+
+    /* ==========================================================================
+       3. BOTÕES E CONTROLES INTERATIVOS (TOUCH-FRIENDLY ANDROID)
+       ========================================================================== */
+    button, .btn {
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: 11px 16px;
+      min-height: 44px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.12s ease, background-color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      color: var(--text-main);
+      background: var(--bg-card);
+      user-select: none;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%);
+      border-color: rgba(216, 180, 254, 0.35);
+      box-shadow: 0 4px 16px rgba(168, 85, 247, 0.32);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 22px rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border-color: var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--neon-primary);
+      background: #20163f;
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 6px 11px;
+      font-size: 0.82rem;
+      border-radius: 8px;
+    }
+
+    .btn-icon {
+      min-height: 38px;
+      min-width: 38px;
+      padding: 6px;
+    }
+
+    .w-full { width: 100%; }
+
+    /* ==========================================================================
+       4. CAMPOS DE FORMULÁRIO
+       ========================================================================== */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: #ffffff;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--neon-primary);
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 42px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: var(--bg-input);
+      padding: 3px;
+      cursor: pointer;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--neon-primary);
+      height: 28px;
+      cursor: pointer;
+    }
+
+    /* Switch Toggle */
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+      gap: 12px;
+    }
+
+    .switch-row span {
+      font-size: 0.9rem;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #291d4d;
+      transition: 0.25s;
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--neon-primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    /* ==========================================================================
+       5. CARDS E SEÇÕES DA TELA INICIAL
+       ========================================================================== */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      border-radius: 4px;
+      background: var(--neon-primary);
+      box-shadow: 0 0 8px var(--neon-primary);
+    }
+
+    .hero-banner {
+      background: radial-gradient(circle at top right, rgba(168, 85, 247, 0.25), transparent 60%), var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .hero-banner h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .hero-banner p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 540px) {
+      .hero-actions {
+        grid-template-columns: 1fr auto;
+      }
+    }
+
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .templates-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .template-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      min-height: 92px;
+    }
+
+    .template-card:hover {
+      border-color: var(--neon-primary);
+      background: #1f163d;
+    }
+
+    .template-badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: rgba(168, 85, 247, 0.18);
+      color: var(--neon-light);
+      font-weight: 600;
+    }
+
+    .template-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .template-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    /* Lista de Planilhas Salvas */
+    .saved-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .saved-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .saved-item-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      word-break: break-word;
+    }
+
+    .saved-item-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .saved-item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* ==========================================================================
+       6. NAVEGAÇÃO DO EDITOR (6 ÁREAS SEM ROLAGEM HORIZONTAL)
+       ========================================================================== */
+    .editor-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--bg-surface);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 680px) {
+      .editor-nav {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    .nav-tab {
+      min-height: 44px;
+      padding: 6px 4px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      flex-direction: column;
+      gap: 2px;
+      text-align: center;
+    }
+
+    .nav-tab.active {
+      background: linear-gradient(135deg, rgba(126, 34, 206, 0.45), rgba(168, 85, 247, 0.3));
+      border-color: var(--neon-primary);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.25);
+    }
+
+    .nav-tab-num {
+      font-size: 0.68rem;
+      color: var(--neon-light);
+      opacity: 0.9;
+    }
+
+    /* Resumo rápido fixo no topo do editor */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .stat-value {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--neon-light);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==========================================================================
+       7. LISTA DE JOGADORES NO EDITOR
+       ========================================================================== */
+    .player-row {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .player-row-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .player-pos-badge {
+      min-width: 34px;
+      height: 34px;
+      padding: 0 6px;
+      border-radius: 8px;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: var(--neon-light);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .player-pos-badge.rank-1 {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #090612;
+      border-color: #fde68a;
+    }
+
+    .player-nick-display {
+      flex: 1;
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #ffffff;
+      word-break: break-word;
+      unicode-bidi: plaintext;
+    }
+
+    .player-score-badge {
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-row-tools {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ==========================================================================
+       8. PERSONALIZAÇÃO VISUAL E SELETORES
+       ========================================================================== */
+    .theme-presets {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 500px) {
+      .theme-presets {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .preset-btn {
+      justify-content: flex-start;
+      padding: 10px;
+      font-size: 0.84rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .preset-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    /* ==========================================================================
+       9. PRÉVIA EM TEMPO REAL E EXPORTAÇÃO
+       ========================================================================== */
+    .preview-wrapper {
+      width: 100%;
+      background: #05030a;
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .preview-canvas-container {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      justify-content: center;
+    }
+
+    #previewCanvas, #exportPreviewImg {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+      display: block;
+    }
+
+    /* ==========================================================================
+       10. MODAIS E TOASTS (SEM ALERT/CONFIRM NATIVO)
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 3, 12, 0.82);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .modal-body {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 120;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: calc(100% - 32px);
+      max-width: 420px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #1d1438;
+      border: 1px solid var(--neon-primary);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideUp 0.22s ease;
+    }
+
+    .toast.error {
+      border-color: var(--danger);
+      background: #2b1119;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hidden { display: none !important; }
+    .empty-state {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       CABEÇALHO PRINCIPAL
+       ======================================================================== -->
+  <header class="app-header">
+    <div class="brand" id="btnGoHome" role="button" tabindex="0" aria-label="Voltar para tela inicial">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+          <path d="M4 22h16"/>
+          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+        </svg>
+      </div>
+      <div>
+        <span class="brand-title">SILVA PLANILHAS</span>
+        <span class="brand-sub">Rankings &amp; Guerra de Guilda</span>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span id="saveIndicator" style="font-size:0.72rem; color:#34d399; display:none;">● Salvo</span>
+      <button id="btnHeaderHome" class="btn-secondary btn-sm hidden">← Início</button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       TELA 1: INICIAL (HOME)
+       ======================================================================== -->
+  <main id="homeView" class="container">
+    <section class="hero-banner">
+      <h1>Planilhas Visuais Gamer</h1>
+      <p>Crie tabelas profissionais de pontuação para Guerra de Guilda, campeonatos e rankings com exportação PNG em alta definição.</p>
+      <div class="hero-actions">
+        <button id="btnCreateNew" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Criar nova planilha
+        </button>
+        <label for="importJsonInput" class="btn btn-secondary" style="margin:0; cursor:pointer;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Importar Backup JSON
+        </label>
+        <input type="file" id="importJsonInput" accept=".json,application/json" class="hidden" />
+      </div>
+    </section>
+
+    <!-- MODELOS DISPONÍVEIS -->
+    <section class="card">
+      <div class="section-header">
+        <h2 class="section-title">Modelos disponíveis</h2>
+        <span style="font-size:0.76rem; color:var(--text-muted);">Toque para iniciar</span>
+      </div>
+      <div class="templates-grid" id="templatesGrid"></div>
+    </section>
+
+    <!-- MINHAS PLANILHAS SALVAS -->
+    <section class="card">
+      <div class="section-header">
+        <h2 class="section-title">Minhas planilhas</h2>
+        <span id="savedCountBadge" style="font-size:0.78rem; color:var(--neon-light); font-weight:700;">0 salvas</span>
+      </div>
+      <div id="savedSheetsList"></div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       TELA 2: EDITOR COMPLETO (6 ÁREAS)
+       ======================================================================== -->
+  <section id="editorView" class="container hidden">
+    <!-- Barra de Estatísticas em Tempo Real -->
+    <div class="stats-bar">
+      <div class="stat-box">
+        <div class="stat-label">Jogadores</div>
+        <div class="stat-value" id="statPlayersCount">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">1º Colocado</div>
+        <div class="stat-value" id="statLeader" dir="auto">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Pontos</div>
+        <div class="stat-value" id="statTotalPoints">0</div>
+      </div>
+    </div>
+
+    <!-- Navegação das 6 Áreas do Editor -->
+    <nav class="editor-nav" aria-label="Seções do editor">
+      <button class="nav-tab active" data-tab="tab-dados">
+        <span class="nav-tab-num">1</span>
+        <span>Dados</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-cadastro">
+        <span class="nav-tab-num">2</span>
+        <span>Adicionar</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-lista">
+        <span class="nav-tab-num">3</span>
+        <span>Lista (<span id="tabListCount">0</span>)</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-visual">
+        <span class="nav-tab-num">4</span>
+        <span>Visual</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-previa">
+        <span class="nav-tab-num">5</span>
+        <span>Prévia</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-exportar">
+        <span class="nav-tab-num">6</span>
+        <span>Exportar</span>
+      </button>
+    </nav>
+
+    <!-- ÁREA 1: DADOS DA PLANILHA -->
+    <div id="tab-dados" class="editor-panel card">
+      <div class="section-header">
+        <h2 class="section-title">1. Dados da planilha</h2>
+      </div>
+
+      <div class="form-group">
+        <label for="inputSheetTitle">Título da planilha</label>
+        <input type="text" id="inputSheetTitle" placeholder="Ex: GUERRA DE GUILDA — SÁBADO" />
+      </div>
+
+      <div class="form-group">
+        <label for="inputSheetSubtitle">Subtítulo / Data / Observação (opcional)</label>
+        <input type="text" id="inputSheetSubtitle" placeholder="Ex: META: 150 PONTOS • TURNO NOITE" />
+      </div>
+
+      <div class="form-group">
+        <label for="selectTemplateModel">Modelo de planilha</label>
+        <select id="selectTemplateModel">
+          <option value="Guerra de Guilda">Guerra de Guilda</option>
+          <option value="Ranking de jogadores">Ranking de jogadores</option>
+          <option value="Campeonato">Campeonato</option>
+          <option value="Classificação de equipes">Classificação de equipes</option>
+          <option value="Controle de pontuação">Controle de pontuação</option>
+          <option value="Lista de participantes">Lista de participantes</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="selectNumberingMode">Modo de numeração das posições</label>
+        <select id="selectNumberingMode">
+          <option value="auto">Automática (1º, 2º, 3º... com suporte a empates)</option>
+          <option value="manual">Manual (definida por jogador ou ordem da lista)</option>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <button class="btn-primary w-full" onclick="switchEditorTab('tab-cadastro')">Continuar para Jogadores →</button>
+      </div>
+    </div>
+
+    <!-- ÁREA 2: CADASTRO DE JOGADORES -->
+    <div id="tab-cadastro" class="editor-panel card hidden">
+      <div class="section-header">
+        <h2 class="section-title">2. Cadastro de jogadores</h2>
+      </div>
+
+      <div class="form-group">
+        <label for="inputPlayerNick">Nick do jogador (preserva símbolos, emojis, fontes e árabe)</label>
+        <input type="text" id="inputPlayerNick" dir="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Cole ou digite o nick exato aqui..." />
+      </div>
+
+      <div class="form-group">
+        <label for="inputPlayerScore">Pontuação individual</label>
+        <input type="number" id="inputPlayerScore" step="any" inputmode="decimal" placeholder="Ex: 240" />
+      </div>
+
+      <div class="form-group hidden" id="manualPosGroup">
+        <label for="inputPlayerManualPos">Posição manual (opcional)</label>
+        <input type="text" id="inputPlayerManualPos" placeholder="Ex: 1º ou #01" />
+      </div>
+
+      <button id="btnAddPlayer" class="btn-primary w-full">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Adicionar jogador
+      </button>
+
+      <div style="margin-top:14px; display:flex; gap:8px;">
+        <button class="btn-secondary w-full" onclick="switchEditorTab('tab-lista')">Ver lista (<span id="btnToListCount">0</span>)</button>
+        <button class="btn-secondary w-full" onclick="switchEditorTab('tab-previa')">Ver prévia</button>
+      </div>
+    </div>
+
+    <!-- ÁREA 3: LISTA DE JOGADORES CADASTRADOS -->
+    <div id="tab-lista" class="editor-panel card hidden">
+      <div class="section-header">
+        <h2 class="section-title">3. Lista de jogadores</h2>
+        <button id="btnSortByScore" class="btn-primary btn-sm">
+          ↓ Ordenar por Pontuação
+        </button>
+      </div>
+
+      <div id="playersListContainer"></div>
+    </div>
+
+    <!-- ÁREA 4: PERSONALIZAÇÃO VISUAL -->
+    <div id="tab-visual" class="editor-panel card hidden">
+      <div class="section-header">
+        <h2 class="section-title">4. Personalização visual</h2>
+      </div>
+
+      <label>Temas prontos</label>
+      <div class="theme-presets">
+        <button class="preset-btn" data-theme="purple"><span class="preset-dot" style="background:#a855f7;"></span>Roxo neon</button>
+        <button class="preset-btn" data-theme="red"><span class="preset-dot" style="background:#ef4444;"></span>Vermelho</button>
+        <button class="preset-btn" data-theme="blue"><span class="preset-dot" style="background:#3b82f6;"></span>Azul</button>
+        <button class="preset-btn" data-theme="green"><span class="preset-dot" style="background:#10b981;"></span>Verde</button>
+        <button class="preset-btn" data-theme="gold"><span class="preset-dot" style="background:#f59e0b;"></span>Dourado</button>
+        <button class="preset-btn" data-theme="bw"><span class="preset-dot" style="background:#ffffff;"></span>Preto e branco</button>
+      </div>
+
+      <div class="color-grid">
+        <div>
+          <label for="colorBg">Cor do fundo</label>
+          <input type="color" id="colorBg" />
+        </div>
+        <div>
+          <label for="colorAccent">Cor destaque / borda</label>
+          <input type="color" id="colorAccent" />
+        </div>
+        <div>
+          <label for="colorText">Cor dos textos (nicks)</label>
+          <input type="color" id="colorText" />
+        </div>
+        <div>
+          <label for="colorPos">Cor das posições</label>
+          <input type="color" id="colorPos" />
+        </div>
+        <div>
+          <label for="colorScore">Cor das pontuações</label>
+          <input type="color" id="colorScore" />
+        </div>
+        <div>
+          <label for="selectBgType">Estilo de fundo</label>
+          <select id="selectBgType">
+            <option value="gradient">Degradê Gamer</option>
+            <option value="solid">Simples (Sólido)</option>
+            <option value="grid">Textura Grade Tech</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="color-grid">
+        <div>
+          <label for="selectRowStyle">Estilo das linhas</label>
+          <select id="selectRowStyle">
+            <option value="neon">Neon Borda</option>
+            <option value="solid">Card Sólido</option>
+            <option value="striped">Zebrada</option>
+            <option value="minimal">Minimalista</option>
+          </select>
+        </div>
+        <div>
+          <label for="selectHeaderStyle">Modelo de título</label>
+          <select id="selectHeaderStyle">
+            <option value="banner">Banner Gamer</option>
+            <option value="esports">E-Sports Neon</option>
+            <option value="crown">Coroa / Troféu</option>
+            <option value="minimal">Minimalista</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="rangeFontSize">Tamanho dos textos: <span id="valFontSize">100%</span></label>
+        <input type="range" id="rangeFontSize" min="80" max="135" step="5" value="100" />
+      </div>
+
+      <div class="form-group">
+        <label for="rangeRowSpacing">Espaçamento entre jogadores: <span id="valRowSpacing">12px</span></label>
+        <input type="range" id="rangeRowSpacing" min="4" max="26" step="2" value="12" />
+      </div>
+
+      <div class="switch-row">
+        <span>Exibir cabeçalho das colunas (POS / JOGADOR / PTS)</span>
+        <label class="switch">
+          <input type="checkbox" id="toggleShowColumns" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <span>Exibir total de pontos no rodapé</span>
+        <label class="switch">
+          <input type="checkbox" id="toggleShowTotal" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ÁREA 5: PRÉVIA EM TEMPO REAL -->
+    <div id="tab-previa" class="editor-panel card hidden">
+      <div class="section-header">
+        <h2 class="section-title">5. Prévia em tempo real</h2>
+        <button class="btn-primary btn-sm" onclick="switchEditorTab('tab-exportar')">Ir para Exportação →</button>
+      </div>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+        Esta visualização é renderizada exatamente como a imagem PNG final, sem cortar nenhum jogador.
+      </p>
+      <div class="preview-wrapper">
+        <div class="preview-canvas-container">
+          <canvas id="previewCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÁREA 6: EXPORTAÇÃO E BACKUP -->
+    <div id="tab-exportar" class="editor-panel card hidden">
+      <div class="section-header">
+        <h2 class="section-title">6. Exportação de imagem</h2>
+      </div>
+
+      <div class="form-group">
+        <label for="selectExportFormat">Formato da imagem</label>
+        <select id="selectExportFormat">
+          <option value="vertical">Vertical Padrão WhatsApp (1080px largura • Altura dinâmica)</option>
+          <option value="square">Quadrado 1:1 (1080x1080 mínimo • Ajusta se houver muitos jogadores)</option>
+          <option value="stories">Stories 9:16 (1080x1920 mínimo • Ajusta se houver muitos jogadores)</option>
+        </select>
+      </div>
+
+      <button id="btnGenerateImage" class="btn-primary w-full" style="min-height:52px; font-size:1rem;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        GERAR IMAGEM
+      </button>
+
+      <div id="exportResultArea" class="hidden" style="margin-top:16px;">
+        <div style="display:grid; grid-template-columns: 1fr; gap:10px; margin-bottom:14px;">
+          <button id="btnDownloadPng" class="btn-primary w-full">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Baixar imagem PNG
+          </button>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <button id="btnSharePng" class="btn-secondary">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Compartilhar
+            </button>
+            <button id="btnCopyPng" class="btn-secondary">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copiar imagem
+            </button>
+          </div>
+        </div>
+
+        <div class="preview-wrapper">
+          <div class="preview-canvas-container">
+            <img id="exportPreviewImg" alt="Imagem gerada da planilha" />
+          </div>
+        </div>
+      </div>
+
+      <hr style="border:0; border-top:1px solid var(--border-subtle); margin:20px 0;" />
+
+      <div class="section-header">
+        <h3 class="section-title" style="font-size:0.92rem;">Backup da planilha (JSON)</h3>
+      </div>
+      <button id="btnExportSheetJson" class="btn-secondary w-full">
+        Exportar dados desta planilha (.JSON)
+      </button>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MODAIS CUSTOMIZADOS (CONFIRMAÇÃO, EDIÇÃO E RENOMEAR)
+       ======================================================================== -->
+  <div id="customModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <h3 class="modal-title" id="modalTitle">Confirmar</h3>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       JAVASCRIPT COMPLETO E MODULAR
+       ======================================================================== -->
+  <script>
+    (function () {
+      "use strict";
+
+      /* ======================================================================
+         1. CONSTANTES, MODELOS E TEMAS
+         ====================================================================== */
+      const STORAGE_KEY = "silva_planilhas_v1_sheets";
+      const ACTIVE_ID_KEY = "silva_planilhas_v1_active";
+
+      const TEMPLATES = [
+        {
+          id: "guerra-guilda",
+          name: "Guerra de Guilda",
+          badge: "Free Fire",
+          desc: "Pontuação oficial da guerra semanal",
+          defaultTitle: "GUERRA DE GUILDA",
+          defaultSubtitle: "PONTUAÇÃO OFICIAL",
+          theme: "purple"
+        },
+        {
+          id: "ranking-jogadores",
+          name: "Ranking de jogadores",
+          badge: "Top Players",
+          desc: "Classificação individual por pontos",
+          defaultTitle: "RANKING DE JOGADORES",
+          defaultSubtitle: "TEMPORADA ATUAL",
+          theme: "gold"
+        },
+        {
+          id: "campeonato",
+          name: "Campeonato",
+          badge: "Torneio",
+          desc: "Tabela competitiva de campeonato",
+          defaultTitle: "TABELA DO CAMPEONATO",
+          defaultSubtitle: "CLASSIFICAÇÃO GERAL",
+          theme: "red"
+        },
+        {
+          id: "classificacao-equipes",
+          name: "Classificação de equipes",
+          badge: "Squads / Lines",
+          desc: "Pontuação por equipe ou line-up",
+          defaultTitle: "CLASSIFICAÇÃO DE EQUIPES",
+          defaultSubtitle: "DISPUTA DE LINES",
+          theme: "blue"
+        },
+        {
+          id: "controle-pontuacao",
+          name: "Controle de pontuação",
+          badge: "Metas",
+          desc: "Acompanhamento diário de pontos",
+          defaultTitle: "CONTROLE DE PONTUAÇÃO",
+          defaultSubtitle: "REGISTRO DE PONTOS",
+          theme: "green"
+        },
+        {
+          id: "lista-participantes",
+          name: "Lista de participantes",
+          badge: "Presença",
+          desc: "Lista organizada de inscritos",
+          defaultTitle: "LISTA DE PARTICIPANTES",
+          defaultSubtitle: "CONFIRMADOS",
+          theme: "purple"
+        }
+      ];
+
+      const VISUAL_THEMES = {
+        purple: {
+          bg: "#0b0616",
+          accent: "#a855f7",
+          text: "#ffffff",
+          pos: "#c084fc",
+          score: "#e9d5ff",
+          bgType: "gradient",
+          rowStyle: "neon"
+        },
+        red: {
+          bg: "#140507",
+          accent: "#ef4444",
+          text: "#ffffff",
+          pos: "#fca5a5",
+          score: "#fecaca",
+          bgType: "gradient",
+          rowStyle: "neon"
+        },
+        blue: {
+          bg: "#050b18",
+          accent: "#3b82f6",
+          text: "#ffffff",
+          pos: "#93c5fd",
+          score: "#dbeafe",
+          bgType: "gradient",
+          rowStyle: "neon"
+        },
+        green: {
+          bg: "#04120c",
+          accent: "#10b981",
+          text: "#ffffff",
+          pos: "#6ee7b7",
+          score: "#d1fae5",
+          bgType: "gradient",
+          rowStyle: "neon"
+        },
+        gold: {
+          bg: "#130e04",
+          accent: "#f59e0b",
+          text: "#ffffff",
+          pos: "#fcd34d",
+          score: "#fef3c7",
+          bgType: "gradient",
+          rowStyle: "neon"
+        },
+        bw: {
+          bg: "#0a0a0a",
+          accent: "#ffffff",
+          text: "#ffffff",
+          pos: "#d4d4d4",
+          score: "#ffffff",
+          bgType: "solid",
+          rowStyle: "solid"
+        }
+      };
+
+      /* ======================================================================
+         2. ESTADO DA APLICAÇÃO
+         ====================================================================== */
+      let sheets = [];
+      let activeSheetId = null;
+      let lastGeneratedBlob = null;
+      let lastGeneratedDataUrl = null;
+
+      /* ======================================================================
+         3. UTILITÁRIOS DE SEGURANÇA, UNICODE E PERSISTÊNCIA
+         ====================================================================== */
+      function generateId() {
+        return "sp_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+      }
+
+      // Escapa HTML apenas para DOM seguro, preservando 100% caracteres Unicode/RTL/espaços
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      // Detecta se o texto inicia com caracteres fortes da direita para a esquerda (Árabe, Hebraico, etc.)
+      function isRtlText(text) {
+        if (!text) return false;
+        const rtlChars = /[\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+        const ltrChars = /[A-Za-z\u00C0-\u024F\u0400-\u04FF]/;
+        for (let i = 0; i < text.length; i++) {
+          const ch = text[i];
+          if (rtlChars.test(ch)) return true;
+          if (ltrChars.test(ch)) return false;
+        }
+        return false;
+      }
+
+      function formatScore(num) {
+        const n = Number(num);
+        if (Number.isNaN(n)) return "0";
+        return Number.isInteger(n) ? n.toLocaleString("pt-BR") : n.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+      }
+
+      function showToast(message, isError = false) {
+        const container = document.getElementById("toastContainer");
+        const el = document.createElement("div");
+        el.className = "toast" + (isError ? " error" : "");
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = "0";
+          el.style.transform = "translateY(10px)";
+          el.style.transition = "all 0.2s ease";
+          setTimeout(() => el.remove(), 220);
+        }, 2800);
+      }
+
+      function saveToStorage() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(sheets));
+          if (activeSheetId) {
+            localStorage.setItem(ACTIVE_ID_KEY, activeSheetId);
+          } else {
+            localStorage.removeItem(ACTIVE_ID_KEY);
+          }
+          const ind = document.getElementById("saveIndicator");
+          if (ind && activeSheetId) {
+            ind.style.display = "inline";
+            ind.textContent = "● Salvo";
+          }
+        } catch (err) {
+          showToast("Erro ao salvar no armazenamento local.", true);
+        }
+      }
+
+      function loadFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          sheets = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(sheets)) sheets = [];
+        } catch (e) {
+          sheets = [];
+        }
+      }
+
+      function getActiveSheet() {
+        return sheets.find(s => s.id === activeSheetId) || null;
+      }
+
+      function createSheetObject(templateObj) {
+        const tpl = templateObj || TEMPLATES[0];
+        const themeColors = VISUAL_THEMES[tpl.theme] || VISUAL_THEMES.purple;
+        return {
+          id: generateId(),
+          title: tpl.defaultTitle,
+          subtitle: tpl.defaultSubtitle,
+          model: tpl.name,
+          numberingMode: "auto", // 'auto' ou 'manual'
+          players: [],
+          visual: {
+            theme: tpl.theme,
+            bgColor: themeColors.bg,
+            accentColor: themeColors.accent,
+            textColor: themeColors.text,
+            posColor: themeColors.pos,
+            scoreColor: themeColors.score,
+            bgType: themeColors.bgType,
+            rowStyle: themeColors.rowStyle,
+            headerStyle: "banner",
+            fontSizePercent: 100,
+            rowSpacing: 12,
+            showColumns: true,
+            showTotal: true
+          },
+          exportFormat: "vertical",
+          updatedAt: Date.now()
+        };
+      }
+
+      /* ======================================================================
+         4. CÁLCULOS AUTOMÁTICOS (POSIÇÕES, EMPATES, TOTAL E LÍDER)
+         ====================================================================== */
+      function computeRankings(sheet) {
+        const players = sheet.players || [];
+        let totalPoints = 0;
+
+        players.forEach(p => {
+          const val = Number(p.score);
+          if (!Number.isNaN(val)) totalPoints += val;
+        });
+
+        // Ordenação auxiliar para descobrir ranking real e empates
+        const sortedScores = [...players]
+          .map(p => Number(p.score) || 0)
+          .sort((a, b) => b - a);
+
+        const computed = players.map((p, idx) => {
+          const numScore = Number(p.score) || 0;
+          let displayPos = "";
+          let rankNumber = idx + 1;
+
+          if (sheet.numberingMode === "manual") {
+            displayPos = (p.manualPos && p.manualPos.length > 0) ? p.manualPos : `${idx + 1}º`;
+          } else {
+            // Posição baseada na pontuação (permite empates reais)
+            const firstMatchIndex = sortedScores.indexOf(numScore);
+            rankNumber = firstMatchIndex + 1;
+            displayPos = `${rankNumber}º`;
+          }
+
+          return {
+            ...p,
+            numScore,
+            rankNumber,
+            displayPos
+          };
+        });
+
+        // Identifica 1º colocado (maior pontuação)
+        let leader = null;
+        if (players.length > 0) {
+          leader = players.reduce((best, curr) => {
+            return (Number(curr.score) || 0) > (Number(best.score) || 0) ? curr : best;
+          }, players[0]);
+        }
+
+        return {
+          items: computed,
+          totalPoints,
+          count: players.length,
+          leader
+        };
+      }
+
+      /* ======================================================================
+         5. NAVEGAÇÃO ENTRE TELA INICIAL E EDITOR
+         ====================================================================== */
+      function showHomeView() {
+        activeSheetId = null;
+        saveToStorage();
+        document.getElementById("homeView").classList.remove("hidden");
+        document.getElementById("editorView").classList.add("hidden");
+        document.getElementById("btnHeaderHome").classList.add("hidden");
+        document.getElementById("saveIndicator").style.display = "none";
+        renderHome();
+      }
+
+      function openEditor(sheetId) {
+        const sheet = sheets.find(s => s.id === sheetId);
+        if (!sheet) return;
+        activeSheetId = sheet.id;
+        saveToStorage();
+
+        document.getElementById("homeView").classList.add("hidden");
+        document.getElementById("editorView").classList.remove("hidden");
+        document.getElementById("btnHeaderHome").classList.remove("hidden");
+        document.getElementById("exportResultArea").classList.add("hidden");
+
+        syncEditorInputsFromSheet();
+        refreshAllEditorViews();
+        switchEditorTab("tab-dados");
+      }
+
+      window.switchEditorTab = function (tabId) {
+        document.querySelectorAll(".nav-tab").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.tab === tabId);
+        });
+        document.querySelectorAll(".editor-panel").forEach(panel => {
+          panel.classList.toggle("hidden", panel.id !== tabId);
+        });
+        if (tabId === "tab-previa") {
+          renderPreviewCanvas();
+        }
+      };
+
+      /* ======================================================================
+         6. RENDERIZAÇÃO DA TELA INICIAL
+         ====================================================================== */
+      function renderHome() {
+        // Renderizar modelos prontos
+        const tplGrid = document.getElementById("templatesGrid");
+        tplGrid.innerHTML = TEMPLATES.map(tpl => `
+          <button class="template-card" data-tpl-id="${tpl.id}">
+            <span class="template-badge">${escapeHtml(tpl.badge)}</span>
+            <span class="template-name">${escapeHtml(tpl.name)}</span>
+            <span class="template-desc">${escapeHtml(tpl.desc)}</span>
+          </button>
+        `).join("");
+
+        tplGrid.querySelectorAll(".template-card").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const tpl = TEMPLATES.find(t => t.id === btn.dataset.tplId);
+            const newSheet = createSheetObject(tpl);
+            sheets.unshift(newSheet);
+            saveToStorage();
+            openEditor(newSheet.id);
+            showToast(`Modelo "${tpl.name}" criado!`);
+          });
+        });
+
+        // Renderizar planilhas salvas
+        const listEl = document.getElementById("savedSheetsList");
+        const countBadge = document.getElementById("savedCountBadge");
+        countBadge.textContent = `${sheets.length} ${sheets.length === 1 ? "salva" : "salvas"}`;
+
+        if (sheets.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty-state">
+              Nenhuma planilha salva ainda.<br/>
+              Toque em <strong>"Criar nova planilha"</strong> ou escolha um modelo acima.
+            </div>
+          `;
+          return;
+        }
+
+        listEl.innerHTML = sheets.map(s => {
+          const stats = computeRankings(s);
+          const dateStr = new Date(s.updatedAt || Date.now()).toLocaleDateString("pt-BR", {
+            day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit"
+          });
+          return `
+            <div class="saved-item">
+              <div class="saved-item-top">
+                <div>
+                  <div class="saved-item-title" dir="auto">${escapeHtml(s.title || "Sem título")}</div>
+                  <div class="saved-item-meta">
+                    ${escapeHtml(s.model)} • ${stats.count} ${stats.count === 1 ? "jogador" : "jogadores"} • Total: ${formatScore(stats.totalPoints)} pts • ${dateStr}
+                  </div>
+                </div>
+              </div>
+              <div class="saved-item-actions">
+                <button class="btn-primary btn-sm" onclick="appActions.open('${s.id}')">Abrir / Editar</button>
+                <button class="btn-secondary btn-sm" onclick="appActions.rename('${s.id}')">Renomear</button>
+                <button class="btn-secondary btn-sm" onclick="appActions.duplicate('${s.id}')">Duplicar</button>
+                <button class="btn-danger btn-sm" onclick="appActions.remove('${s.id}')">Excluir</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      /* ======================================================================
+         7. SINCRONIZAÇÃO DO EDITOR E AÇÕES DE JOGADORES
+         ====================================================================== */
+      function syncEditorInputsFromSheet() {
+        const s = getActiveSheet();
+        if (!s) return;
+
+        document.getElementById("inputSheetTitle").value = s.title;
+        document.getElementById("inputSheetSubtitle").value = s.subtitle || "";
+        document.getElementById("selectTemplateModel").value = s.model || "Guerra de Guilda";
+        document.getElementById("selectNumberingMode").value = s.numberingMode || "auto";
+
+        const manualGroup = document.getElementById("manualPosGroup");
+        manualGroup.classList.toggle("hidden", s.numberingMode !== "manual");
+
+        // Visual
+        const v = s.visual;
+        document.getElementById("colorBg").value = v.bgColor;
+        document.getElementById("colorAccent").value = v.accentColor;
+        document.getElementById("colorText").value = v.textColor;
+        document.getElementById("colorPos").value = v.posColor;
+        document.getElementById("colorScore").value = v.scoreColor;
+        document.getElementById("selectBgType").value = v.bgType;
+        document.getElementById("selectRowStyle").value = v.rowStyle;
+        document.getElementById("selectHeaderStyle").value = v.headerStyle;
+        document.getElementById("rangeFontSize").value = v.fontSizePercent;
+        document.getElementById("valFontSize").textContent = `${v.fontSizePercent}%`;
+        document.getElementById("rangeRowSpacing").value = v.rowSpacing;
+        document.getElementById("valRowSpacing").textContent = `${v.rowSpacing}px`;
+        document.getElementById("toggleShowColumns").checked = Boolean(v.showColumns);
+        document.getElementById("toggleShowTotal").checked = Boolean(v.showTotal);
+        document.getElementById("selectExportFormat").value = s.exportFormat || "vertical";
+      }
+
+      function refreshAllEditorViews() {
+        const s = getActiveSheet();
+        if (!s) return;
+
+        s.updatedAt = Date.now();
+        saveToStorage();
+
+        const stats = computeRankings(s);
+        document.getElementById("statPlayersCount").textContent = stats.count;
+        document.getElementById("statLeader").textContent = stats.leader ? stats.leader.nick : "—";
+        document.getElementById("statTotalPoints").textContent = formatScore(stats.totalPoints);
+        document.getElementById("tabListCount").textContent = stats.count;
+        document.getElementById("btnToListCount").textContent = stats.count;
+
+        renderPlayersList(stats.items);
+        renderPreviewCanvas();
+      }
+
+      function renderPlayersList(computedItems) {
+        const container = document.getElementById("playersListContainer");
+        const s = getActiveSheet();
+        if (!s) return;
+
+        if (computedItems.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              Nenhum jogador adicionado ainda.<br/>
+              Vá na aba <strong>"2. Adicionar"</strong> para cadastrar jogadores.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = computedItems.map((p, index) => {
+          const isFirst = p.rankNumber === 1 && p.numScore > 0;
+          return `
+            <div class="player-row">
+              <div class="player-row-main">
+                <div class="player-pos-badge ${isFirst ? "rank-1" : ""}">${escapeHtml(p.displayPos)}</div>
+                <div class="player-nick-display" dir="auto">${escapeHtml(p.nick)}</div>
+                <div class="player-score-badge">${formatScore(p.numScore)}</div>
+              </div>
+              <div class="player-row-tools">
+                <button class="btn-secondary btn-icon" title="Mover para cima" ${index === 0 ? "disabled style='opacity:0.4'" : ""} onclick="playerActions.moveUp(${index})">↑</button>
+                <button class="btn-secondary btn-icon" title="Mover para baixo" ${index === computedItems.length - 1 ? "disabled style='opacity:0.4'" : ""} onclick="playerActions.moveDown(${index})">↓</button>
+                <button class="btn-secondary btn-sm" onclick="playerActions.edit('${p.id}')">Editar</button>
+                <button class="btn-secondary btn-sm" onclick="playerActions.duplicate('${p.id}')">Duplicar</button>
+                <button class="btn-danger btn-sm" onclick="playerActions.remove('${p.id}')">Excluir</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function addPlayerHandler() {
+        const s = getActiveSheet();
+        if (!s) return;
+
+        const nickInput = document.getElementById("inputPlayerNick");
+        const scoreInput = document.getElementById("inputPlayerScore");
+        const manualPosInput = document.getElementById("inputPlayerManualPos");
+
+        // PRESERVAÇÃO LITERAL DO NICK (sem trim, sem normalize, sem alteração)
+        const rawNick = nickInput.value;
+        const rawScore = scoreInput.value;
+
+        if (rawNick.length === 0) {
+          showToast("Digite o nick do jogador.", true);
+          nickInput.focus();
+          return;
+        }
+
+        if (rawScore === "" || Number.isNaN(Number(rawScore))) {
+          showToast("Informe uma pontuação numérica válida.", true);
+          scoreInput.focus();
+          return;
+        }
+
+        const numericScore = Number(rawScore);
+        const manualPos = manualPosInput.value;
+
+        const commitAdd = () => {
+          s.players.push({
+            id: generateId(),
+            nick: rawNick,
+            score: numericScore,
+            manualPos: manualPos
+          });
+          nickInput.value = "";
+          scoreInput.value = "";
+          manualPosInput.value = "";
+          refreshAllEditorViews();
+          showToast("Jogador adicionado!");
+          nickInput.focus();
+        };
+
+        // Verifica duplicação acidental exata
+        const alreadyExists = s.players.some(p => p.nick === rawNick);
+        if (alreadyExists) {
+          openModal({
+            title: "Jogador já cadastrado",
+            html: `<p>O nick <strong dir="auto" style="color:#fff;">${escapeHtml(rawNick)}</strong> já está na lista desta planilha. Deseja adicionar mesmo assim?</p>`,
+            actions: [
+              { label: "Cancelar", className: "btn-secondary", onClick: closeModal },
+              {
+                label: "Adicionar mesmo assim",
+                className: "btn-primary",
+                onClick: () => {
+                  closeModal();
+                  commitAdd();
+                }
+              }
+            ]
+          });
+        } else {
+          commitAdd();
+        }
+      }
+
+      /* ======================================================================
+         8. MODAIS DE CONFIRMAÇÃO E EDIÇÃO
+         ====================================================================== */
+      function openModal({ title, html, actions }) {
+        const backdrop = document.getElementById("customModal");
+        document.getElementById("modalTitle").textContent = title;
+        const bodyEl = document.getElementById("modalBody");
+        bodyEl.innerHTML = html;
+
+        const actionsEl = document.getElementById("modalActions");
+        actionsEl.innerHTML = "";
+        actions.forEach(act => {
+          const btn = document.createElement("button");
+          btn.className = act.className || "btn-secondary";
+          btn.textContent = act.label;
+          btn.addEventListener("click", act.onClick);
+          actionsEl.appendChild(btn);
+        });
+
+        backdrop.classList.add("open");
+      }
+
+      function closeModal() {
+        document.getElementById("customModal").classList.remove("open");
+      }
+
+      /* ======================================================================
+         9. AÇÕES GLOBAIS (PLANILHAS E JOGADORES)
+         ====================================================================== */
+      window.appActions = {
+        open(id) {
+          openEditor(id);
+        },
+        rename(id) {
+          const sheet = sheets.find(s => s.id === id);
+          if (!sheet) return;
+          openModal({
+            title: "Renomear planilha",
+            html: `
+              <div class="form-group" style="margin:0;">
+                <label for="modalRenameInput">Novo nome da planilha</label>
+                <input type="text" id="modalRenameInput" value="${escapeHtml(sheet.title)}" />
+              </div>
+            `,
+            actions: [
+              { label: "Cancelar", className: "btn-secondary", onClick: closeModal },
+              {
+                label: "Salvar nome",
+                className: "btn-primary",
+                onClick: () => {
+                  const val = document.getElementById("modalRenameInput").value;
+                  if (!val) {
+                    showToast("O nome não pode ficar vazio.", true);
+                    return;
+                  }
+                  sheet.title = val;
+                  sheet.updatedAt = Date.now();
+                  saveToStorage();
+                  renderHome();
+                  closeModal();
+                  showToast("Planilha renomeada!");
+                }
+              }
+            ]
+          });
+        },
+        duplicate(id) {
+          const sheet = sheets.find(s => s.id === id);
+          if (!sheet) return;
+          const copy = JSON.parse(JSON.stringify(sheet));
+          copy.id = generateId();
+          copy.title = `${sheet.title} (Cópia)`;
+          copy.updatedAt = Date.now();
+          sheets.unshift(copy);
+          saveToStorage();
+          renderHome();
+          showToast("Planilha duplicada!");
+        },
+        remove(id) {
+          const sheet = sheets.find(s => s.id === id);
+          if (!sheet) return;
+          openModal({
+            title: "Excluir planilha",
+            html: `<p>Tem certeza que deseja excluir permanentemente <strong>"${escapeHtml(sheet.title)}"</strong>?</p>`,
+            actions: [
+              { label: "Cancelar", className: "btn-secondary", onClick: closeModal },
+              {
+                label: "Excluir",
+                className: "btn-danger",
+                onClick: () => {
+                  sheets = sheets.filter(s => s.id !== id);
+                  saveToStorage();
+                  renderHome();
+                  closeModal();
+                  showToast("Planilha excluída.");
+                }
+              }
+            ]
+          });
+        }
+      };
+
+      window.playerActions = {
+        moveUp(index) {
+          const s = getActiveSheet();
+          if (!s || index <= 0) return;
+          const temp = s.players[index - 1];
+          s.players[index - 1] = s.players[index];
+          s.players[index] = temp;
+          refreshAllEditorViews();
+        },
+        moveDown(index) {
+          const s = getActiveSheet();
+          if (!s || index >= s.players.length - 1) return;
+          const temp = s.players[index + 1];
+          s.players[index + 1] = s.players[index];
+          s.players[index] = temp;
+          refreshAllEditorViews();
+        },
+        duplicate(playerId) {
+          const s = getActiveSheet();
+          if (!s) return;
+          const idx = s.players.findIndex(p => p.id === playerId);
+          if (idx === -1) return;
+          const orig = s.players[idx];
+          s.players.splice(idx + 1, 0, {
+            id: generateId(),
+            nick: orig.nick,
+            score: orig.score,
+            manualPos: orig.manualPos || ""
+          });
+          refreshAllEditorViews();
+          showToast("Jogador duplicado.");
+        },
+        remove(playerId) {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.players = s.players.filter(p => p.id !== playerId);
+          refreshAllEditorViews();
+          showToast("Jogador removido.");
+        },
+        edit(playerId) {
+          const s = getActiveSheet();
+          if (!s) return;
+          const player = s.players.find(p => p.id === playerId);
+          if (!player) return;
+
+          const showManual = s.numberingMode === "manual";
+          openModal({
+            title: "Editar jogador",
+            html: `
+              <div class="form-group">
+                <label for="editNickInput">Nick do jogador (exato)</label>
+                <input type="text" id="editNickInput" dir="auto" spellcheck="false" />
+              </div>
+              <div class="form-group">
+                <label for="editScoreInput">Pontuação</label>
+                <input type="number" id="editScoreInput" step="any" inputmode="decimal" />
+              </div>
+              ${showManual ? `
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="editManualPosInput">Posição manual</label>
+                  <input type="text" id="editManualPosInput" />
+                </div>
+              ` : ""}
+            `,
+            actions: [
+              { label: "Cancelar", className: "btn-secondary", onClick: closeModal },
+              {
+                label: "Salvar alterações",
+                className: "btn-primary",
+                onClick: () => {
+                  const newNick = document.getElementById("editNickInput").value;
+                  const newScoreRaw = document.getElementById("editScoreInput").value;
+                  if (newNick.length === 0) {
+                    showToast("O nick não pode ficar vazio.", true);
+                    return;
+                  }
+                  if (newScoreRaw === "" || Number.isNaN(Number(newScoreRaw))) {
+                    showToast("Pontuação inválida.", true);
+                    return;
+                  }
+                  player.nick = newNick;
+                  player.score = Number(newScoreRaw);
+                  if (showManual) {
+                    player.manualPos = document.getElementById("editManualPosInput").value;
+                  }
+                  refreshAllEditorViews();
+                  closeModal();
+                  showToast("Jogador atualizado!");
+                }
+              }
+            ]
+          });
+
+          // Atribuição direta via .value garante 100% fidelidade Unicode/RTL sem parsing HTML
+          document.getElementById("editNickInput").value = player.nick;
+          document.getElementById("editScoreInput").value = player.score;
+          if (showManual) {
+            document.getElementById("editManualPosInput").value = player.manualPos || "";
+          }
+        }
+      };
+
+      /* ======================================================================
+         10. MOTOR DE RENDERIZAÇÃO NATIVO CANVAS 2D (ALTA RESOLUÇÃO + RTL + UNICODE)
+         ====================================================================== */
+      function drawRoundedRect(ctx, x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
+      }
+
+      function hexToRgba(hex, alpha) {
+        const clean = hex.replace("#", "");
+        const bigint = parseInt(clean.length === 3 ? clean.split("").map(c => c + c).join("") : clean, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
+      function renderSheetToCanvas(targetCanvas, sheet, scaleFactor = 2) {
+        const stats = computeRankings(sheet);
+        const v = sheet.visual;
+        const format = sheet.exportFormat || "vertical";
+
+        // Dimensões base lógicas (1080px de largura para máxima nitidez no WhatsApp)
+        const baseWidth = 1080;
+        const paddingX = 56;
+        const contentWidth = baseWidth - paddingX * 2;
+        const fontScale = (v.fontSizePercent || 100) / 100;
+        const rowGap = Number(v.rowSpacing ?? 12);
+
+        const headerHeight = sheet.subtitle ? 210 : 175;
+        const colHeaderHeight = v.showColumns ? 54 : 0;
+        const rowHeight = Math.round(74 * Math.max(0.88, fontScale));
+        const rowsCount = Math.max(1, stats.items.length);
+        const listHeight = rowsCount * rowHeight + (rowsCount - 1) * rowGap;
+        const footerHeight = v.showTotal ? 120 : 64;
+        const verticalMargins = 96;
+
+        let naturalHeight = verticalMargins + headerHeight + colHeaderHeight + listHeight + footerHeight;
+
+        // Respeita altura mínima dos formatos Quadrado (1:1) e Stories (9:16), mas NUNCA corta jogadores
+        let baseHeight = naturalHeight;
+        if (format === "square") {
+          baseHeight = Math.max(1080, naturalHeight);
+        } else if (format === "stories") {
+          baseHeight = Math.max(1920, naturalHeight);
+        }
+
+        targetCanvas.width = baseWidth * scaleFactor;
+        targetCanvas.height = baseHeight * scaleFactor;
+
+        const ctx = targetCanvas.getContext("2d");
+        ctx.save();
+        ctx.scale(scaleFactor, scaleFactor);
+        ctx.textBaseline = "middle";
+
+        const fontStack = 'system-ui, -apple-system, "Segoe UI", Roboto, "Noto Color Emoji", "Apple Color Emoji", sans-serif';
+
+        // 1. FUNDO PRINCIPAL
+        if (v.bgType === "gradient") {
+          const grad = ctx.createLinearGradient(0, 0, baseWidth, baseHeight);
+          grad.addColorStop(0, v.bgColor);
+          grad.addColorStop(0.5, hexToRgba(v.accentColor, 0.22));
+          grad.addColorStop(1, v.bgColor);
+          ctx.fillStyle = v.bgColor;
+          ctx.fillRect(0, 0, baseWidth, baseHeight);
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, baseWidth, baseHeight);
+        } else {
+          ctx.fillStyle = v.bgColor;
+          ctx.fillRect(0, 0, baseWidth, baseHeight);
+        }
+
+        // Textura Tech Grid opcional
+        if (v.bgType === "grid") {
+          ctx.strokeStyle = hexToRgba(v.accentColor, 0.12);
+          ctx.lineWidth = 1.5;
+          const step = 48;
+          for (let gx = 0; gx <= baseWidth; gx += step) {
+            ctx.beginPath();
+            ctx.moveTo(gx, 0);
+            ctx.lineTo(gx, baseHeight);
+            ctx.stroke();
+          }
+          for (let gy = 0; gy <= baseHeight; gy += step) {
+            ctx.beginPath();
+            ctx.moveTo(0, gy);
+            ctx.lineTo(baseWidth, gy);
+            ctx.stroke();
+          }
+        }
+
+        // Brilho superior sutil
+        const topGlow = ctx.createRadialGradient(baseWidth / 2, 0, 40, baseWidth / 2, 0, 680);
+        topGlow.addColorStop(0, hexToRgba(v.accentColor, 0.34));
+        topGlow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = topGlow;
+        ctx.fillRect(0, 0, baseWidth, 680);
+
+        // Moldura externa elegante
+        drawRoundedRect(ctx, 22, 22, baseWidth - 44, baseHeight - 44, 28);
+        ctx.strokeStyle = hexToRgba(v.accentColor, 0.45);
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Centraliza verticalmente caso o formato (1:1 ou 9:16) tenha sobra de altura
+        const extraSpace = Math.max(0, baseHeight - naturalHeight);
+        let cursorY = 48 + Math.floor(extraSpace / 2);
+
+        // 2. CABEÇALHO / TÍTULO DA PLANILHA
+        const titleFontSize = Math.round(46 * fontScale);
+        const subFontSize = Math.round(23 * fontScale);
+
+        if (v.headerStyle === "banner" || v.headerStyle === "esports") {
+          drawRoundedRect(ctx, paddingX, cursorY, contentWidth, headerHeight - 20, 22);
+          const hGrad = ctx.createLinearGradient(paddingX, cursorY, paddingX + contentWidth, cursorY + headerHeight);
+          hGrad.addColorStop(0, hexToRgba(v.accentColor, v.headerStyle === "esports" ? 0.35 : 0.22));
+          hGrad.addColorStop(1, hexToRgba(v.accentColor, 0.08));
+          ctx.fillStyle = hGrad;
+          ctx.fill();
+
+          ctx.strokeStyle = hexToRgba(v.accentColor, v.headerStyle === "esports" ? 0.85 : 0.5);
+          ctx.lineWidth = v.headerStyle === "esports" ? 3 : 2;
+          ctx.stroke();
+        } else if (v.headerStyle === "crown") {
+          // Badge de modelo/coroa
+          ctx.fillStyle = hexToRgba(v.accentColor, 0.25);
+          drawRoundedRect(ctx, baseWidth / 2 - 150, cursorY, 300, 36, 18);
+          ctx.fill();
+          ctx.fillStyle = v.posColor;
+          ctx.font = `700 18px ${fontStack}`;
+          ctx.textAlign = "center";
+          ctx.fillText(`🏆 ${sheet.model.toUpperCase()}`, baseWidth / 2, cursorY + 19);
+        }
+
+        // Renderizar Título com suporte automático a RTL
+        const titleText = sheet.title || "PLANILHA DE PONTUAÇÃO";
+        ctx.direction = isRtlText(titleText) ? "rtl" : "ltr";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = `800 ${titleFontSize}px ${fontStack}`;
+        const titleCenterY = sheet.subtitle ? cursorY + (headerHeight - 20) * 0.38 : cursorY + (headerHeight - 20) * 0.5;
+        ctx.fillText(titleText, baseWidth / 2, titleCenterY, contentWidth - 48);
+
+        if (sheet.subtitle) {
+          ctx.direction = isRtlText(sheet.subtitle) ? "rtl" : "ltr";
+          ctx.fillStyle = v.posColor;
+          ctx.font = `600 ${subFontSize}px ${fontStack}`;
+          ctx.fillText(sheet.subtitle, baseWidth / 2, cursorY + (headerHeight - 20) * 0.72, contentWidth - 48);
+        }
+
+        ctx.direction = "ltr";
+        cursorY += headerHeight;
+
+        // 3. CABEÇALHO DAS COLUNAS
+        const colPosX = paddingX + 54;
+        const colNickLeftX = paddingX + 128;
+        const colScoreRightX = paddingX + contentWidth - 32;
+        const maxNickWidth = colScoreRightX - colNickLeftX - 150;
+
+        if (v.showColumns) {
+          ctx.fillStyle = hexToRgba(v.accentColor, 0.75);
+          ctx.font = `700 19px ${fontStack}`;
+          ctx.textAlign = "center";
+          ctx.fillText("POS", colPosX, cursorY + 22);
+
+          ctx.textAlign = "left";
+          ctx.fillText("JOGADOR / NICK", colNickLeftX, cursorY + 22);
+
+          ctx.textAlign = "right";
+          ctx.fillText("PONTOS", colScoreRightX, cursorY + 22);
+          cursorY += colHeaderHeight;
+        }
+
+        // 4. LINHAS DOS JOGADORES
+        if (stats.items.length === 0) {
+          drawRoundedRect(ctx, paddingX, cursorY, contentWidth, rowHeight, 14);
+          ctx.fillStyle = "rgba(255,255,255,0.04)";
+          ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,0.55)";
+          ctx.font = `500 24px ${fontStack}`;
+          ctx.textAlign = "center";
+          ctx.fillText("Adicione jogadores no editor para visualizar aqui", baseWidth / 2, cursorY + rowHeight / 2);
+          cursorY += rowHeight;
+        } else {
+          const nickFontSize = Math.round(28 * fontScale);
+          const posFontSize = Math.round(25 * fontScale);
+          const scoreFontSize = Math.round(28 * fontScale);
+
+          stats.items.forEach((item, idx) => {
+            const y = cursorY;
+            const centerY = y + rowHeight / 2;
+
+            // Estilo de fundo da linha
+            if (v.rowStyle === "neon") {
+              drawRoundedRect(ctx, paddingX, y, contentWidth, rowHeight, 14);
+              ctx.fillStyle = idx === 0 && item.numScore > 0
+                ? hexToRgba(v.accentColor, 0.24)
+                : "rgba(255, 255, 255, 0.045)";
+              ctx.fill();
+              ctx.strokeStyle = idx === 0 && item.numScore > 0
+                ? v.accentColor
+                : hexToRgba(v.accentColor, 0.35);
+              ctx.lineWidth = idx === 0 && item.numScore > 0 ? 2.5 : 1.5;
+              ctx.stroke();
+            } else if (v.rowStyle === "solid") {
+              drawRoundedRect(ctx, paddingX, y, contentWidth, rowHeight, 12);
+              ctx.fillStyle = "rgba(255, 255, 255, 0.07)";
+              ctx.fill();
+            } else if (v.rowStyle === "striped") {
+              drawRoundedRect(ctx, paddingX, y, contentWidth, rowHeight, 10);
+              ctx.fillStyle = idx % 2 === 0 ? hexToRgba(v.accentColor, 0.14) : "rgba(255, 255, 255, 0.03)";
+              ctx.fill();
+            } else if (v.rowStyle === "minimal") {
+              ctx.strokeStyle = hexToRgba(v.accentColor, 0.25);
+              ctx.lineWidth = 1.5;
+              ctx.beginPath();
+              ctx.moveTo(paddingX, y + rowHeight);
+              ctx.lineTo(paddingX + contentWidth, y + rowHeight);
+              ctx.stroke();
+            }
+
+            // Badge de Posição
+            const badgeW = 64;
+            const badgeH = rowHeight - 22;
+            drawRoundedRect(ctx, colPosX - badgeW / 2, centerY - badgeH / 2, badgeW, badgeH, 10);
+            ctx.fillStyle = hexToRgba(v.accentColor, 0.22);
+            ctx.fill();
+
+            ctx.direction = "ltr";
+            ctx.textAlign = "center";
+            ctx.fillStyle = v.posColor;
+            ctx.font = `800 ${posFontSize}px ${fontStack}`;
+            ctx.fillText(item.displayPos, colPosX, centerY + 1, badgeW - 6);
+
+            // Nick do Jogador (Preservação integral de Unicode, Emojis e RTL Árabe)
+            const nickRtl = isRtlText(item.nick);
+            ctx.direction = nickRtl ? "rtl" : "ltr";
+            ctx.textAlign = "left";
+            ctx.fillStyle = v.textColor;
+            ctx.font = `600 ${nickFontSize}px ${fontStack}`;
+            // Em Canvas com direction='rtl' e textAlign='left', o ponto X representa o início à esquerda da coluna
+            ctx.fillText(item.nick, colNickLeftX, centerY + 1, maxNickWidth);
+
+            // Pontuação
+            ctx.direction = "ltr";
+            ctx.textAlign = "right";
+            ctx.fillStyle = v.scoreColor;
+            ctx.font = `800 ${scoreFontSize}px ${fontStack}`;
+            ctx.fillText(formatScore(item.numScore), colScoreRightX, centerY + 1, 160);
+
+            cursorY += rowHeight + (idx < stats.items.length - 1 ? rowGap : 0);
+          });
+        }
+
+        // 5. RODAPÉ (TOTAL DE PONTOS E ASSINATURA DISCRETA)
+        cursorY += 26;
+        if (v.showTotal) {
+          drawRoundedRect(ctx, paddingX, cursorY, contentWidth, 68, 14);
+          ctx.fillStyle = hexToRgba(v.accentColor, 0.2);
+          ctx.fill();
+          ctx.strokeStyle = hexToRgba(v.accentColor, 0.55);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.direction = "ltr";
+          ctx.textAlign = "left";
+          ctx.fillStyle = "#ffffff";
+          ctx.font = `700 23px ${fontStack}`;
+          ctx.fillText(`TOTAL DE PONTOS (${stats.count} JOGADORES)`, paddingX + 24, cursorY + 35);
+
+          ctx.textAlign = "right";
+          ctx.fillStyle = v.scoreColor;
+          ctx.font = `900 28px ${fontStack}`;
+          ctx.fillText(`${formatScore(stats.totalPoints)} PTS`, paddingX + contentWidth - 24, cursorY + 35);
+          cursorY += 82;
+        }
+
+        // Marca d'água discreta e elegante no rodapé
+        ctx.direction = "ltr";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+        ctx.font = `600 16px ${fontStack}`;
+        ctx.fillText("SILVA PLANILHAS", baseWidth / 2, baseHeight - 36);
+
+        ctx.restore();
+      }
+
+      function renderPreviewCanvas() {
+        const s = getActiveSheet();
+        const canvas = document.getElementById("previewCanvas");
+        if (!s || !canvas) return;
+        // Escala 1.5 na prévia para máxima fluidez em celulares Android
+        renderSheetToCanvas(canvas, s, 1.5);
+      }
+
+      /* ======================================================================
+         11. EXPORTAÇÃO PNG (2X RETINA), COMPARTILHAMENTO E BACKUP JSON
+         ====================================================================== */
+      function generateHighResImage() {
+        const s = getActiveSheet();
+        if (!s) return;
+
+        const offscreen = document.createElement("canvas");
+        // Renderiza em 2x Retina (2160px de largura real)
+        renderSheetToCanvas(offscreen, s, 2);
+
+        lastGeneratedDataUrl = offscreen.toDataURL("image/png");
+        offscreen.toBlob((blob) => {
+          lastGeneratedBlob = blob;
+          const imgEl = document.getElementById("exportPreviewImg");
+          imgEl.src = lastGeneratedDataUrl;
+          document.getElementById("exportResultArea").classList.remove("hidden");
+          showToast("Imagem PNG de alta resolução gerada!");
+        }, "image/png");
+      }
+
+      function downloadGeneratedPng() {
+        const s = getActiveSheet();
+        if (!lastGeneratedDataUrl || !s) return;
+        const safeName = (s.title || "silva-planilha")
+          .replace(/[^a-zA-Z0-9\u00C0-\u024F_-]+/g, "_")
+          .replace(/^_+|_+$/g, "") || "silva-planilha";
+
+        const link = document.createElement("a");
+        link.download = `${safeName}.png`;
+        link.href = lastGeneratedDataUrl;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        showToast("Download da imagem iniciado!");
+      }
+
+      async function shareGeneratedPng() {
+        const s = getActiveSheet();
+        if (!lastGeneratedBlob || !s) return;
+
+        const file = new File([lastGeneratedBlob], "planilha-silva.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: s.title || "SILVA PLANILHAS",
+              text: s.title || "Planilha de Pontuação"
+            });
+          } catch (err) {
+            if (err.name !== "AbortError") {
+              showToast("Não foi possível compartilhar diretamente.", true);
+            }
+          }
+        } else {
+          showToast("Seu navegador não suporta compartilhamento direto. Use 'Baixar imagem PNG'.", true);
+        }
+      }
+
+      async function copyGeneratedPng() {
+        if (!lastGeneratedBlob) return;
+        if (navigator.clipboard && window.ClipboardItem) {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({ "image/png": lastGeneratedBlob })
+            ]);
+            showToast("Imagem copiada para a área de transferência!");
+          } catch (e) {
+            showToast("Permissão negada pelo navegador. Use 'Baixar imagem PNG'.", true);
+          }
+        } else {
+          showToast("Copiar imagem não suportado neste navegador.", true);
+        }
+      }
+
+      function exportActiveSheetJson() {
+        const s = getActiveSheet();
+        if (!s) return;
+        const jsonStr = JSON.stringify(s, null, 2);
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `backup_${(s.title || "planilha").replace(/\s+/g, "_")}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast("Backup JSON exportado!");
+      }
+
+      function importJsonBackup(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const parsed = JSON.parse(e.target.result);
+            const itemsToImport = Array.isArray(parsed) ? parsed : [parsed];
+            let importedCount = 0;
+
+            itemsToImport.forEach(item => {
+              if (item && typeof item === "object" && Array.isArray(item.players)) {
+                const base = createSheetObject(TEMPLATES[0]);
+                const merged = {
+                  ...base,
+                  ...item,
+                  id: generateId(),
+                  visual: { ...base.visual, ...(item.visual || {}) },
+                  updatedAt: Date.now()
+                };
+                sheets.unshift(merged);
+                importedCount++;
+              }
+            });
+
+            if (importedCount > 0) {
+              saveToStorage();
+              renderHome();
+              showToast(`${importedCount} ${importedCount === 1 ? "planilha importada" : "planilhas importadas"}!`);
+            } else {
+              showToast("Arquivo JSON inválido ou incompatível.", true);
+            }
+          } catch (err) {
+            showToast("Erro ao ler o arquivo JSON.", true);
+          } finally {
+            event.target.value = "";
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      /* ======================================================================
+         12. INICIALIZAÇÃO DE EVENTOS
+         ====================================================================== */
+      function bindEvents() {
+        // Navegação Home
+        document.getElementById("btnGoHome").addEventListener("click", showHomeView);
+        document.getElementById("btnHeaderHome").addEventListener("click", showHomeView);
+
+        document.getElementById("btnCreateNew").addEventListener("click", () => {
+          const sheet = createSheetObject(TEMPLATES[0]);
+          sheets.unshift(sheet);
+          saveToStorage();
+          openEditor(sheet.id);
+          showToast("Nova planilha criada!");
+        });
+
+        document.getElementById("importJsonInput").addEventListener("change", importJsonBackup);
+
+        // Tabs do Editor
+        document.querySelectorAll(".nav-tab").forEach(tab => {
+          tab.addEventListener("click", () => switchEditorTab(tab.dataset.tab));
+        });
+
+        // Área 1: Dados da Planilha
+        document.getElementById("inputSheetTitle").addEventListener("input", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.title = e.target.value;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("inputSheetSubtitle").addEventListener("input", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.subtitle = e.target.value;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("selectTemplateModel").addEventListener("change", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.model = e.target.value;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("selectNumberingMode").addEventListener("change", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.numberingMode = e.target.value;
+          document.getElementById("manualPosGroup").classList.toggle("hidden", s.numberingMode !== "manual");
+          refreshAllEditorViews();
+        });
+
+        // Área 2: Cadastro de Jogadores
+        document.getElementById("btnAddPlayer").addEventListener("click", addPlayerHandler);
+        document.getElementById("inputPlayerScore").addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addPlayerHandler();
+          }
+        });
+
+        // Área 3: Ordenar por Pontuação
+        document.getElementById("btnSortByScore").addEventListener("click", () => {
+          const s = getActiveSheet();
+          if (!s || s.players.length < 2) return;
+          s.players.sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
+          refreshAllEditorViews();
+          showToast("Jogadores ordenados da maior para a menor pontuação!");
+        });
+
+        // Área 4: Personalização Visual
+        document.querySelectorAll(".preset-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const s = getActiveSheet();
+            const theme = VISUAL_THEMES[btn.dataset.theme];
+            if (!s || !theme) return;
+            s.visual.theme = btn.dataset.theme;
+            s.visual.bgColor = theme.bg;
+            s.visual.accentColor = theme.accent;
+            s.visual.textColor = theme.text;
+            s.visual.posColor = theme.pos;
+            s.visual.scoreColor = theme.score;
+            s.visual.bgType = theme.bgType;
+            s.visual.rowStyle = theme.rowStyle;
+            syncEditorInputsFromSheet();
+            refreshAllEditorViews();
+            showToast("Tema aplicado!");
+          });
+        });
+
+        const colorBindings = [
+          ["colorBg", "bgColor"],
+          ["colorAccent", "accentColor"],
+          ["colorText", "textColor"],
+          ["colorPos", "posColor"],
+          ["colorScore", "scoreColor"]
+        ];
+        colorBindings.forEach(([elId, prop]) => {
+          document.getElementById(elId).addEventListener("input", (e) => {
+            const s = getActiveSheet();
+            if (!s) return;
+            s.visual[prop] = e.target.value;
+            refreshAllEditorViews();
+          });
+        });
+
+        document.getElementById("selectBgType").addEventListener("change", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.visual.bgType = e.target.value;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("selectRowStyle").addEventListener("change", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.visual.rowStyle = e.target.value;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("selectHeaderStyle").addEventListener("change", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.visual.headerStyle = e.target.value;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("rangeFontSize").addEventListener("input", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.visual.fontSizePercent = Number(e.target.value);
+          document.getElementById("valFontSize").textContent = `${s.visual.fontSizePercent}%`;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("rangeRowSpacing").addEventListener("input", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.visual.rowSpacing = Number(e.target.value);
+          document.getElementById("valRowSpacing").textContent = `${s.visual.rowSpacing}px`;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("toggleShowColumns").addEventListener("change", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.visual.showColumns = e.target.checked;
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("toggleShowTotal").addEventListener("change", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.visual.showTotal = e.target.checked;
+          refreshAllEditorViews();
+        });
+
+        // Área 6: Exportação e Backup
+        document.getElementById("selectExportFormat").addEventListener("change", (e) => {
+          const s = getActiveSheet();
+          if (!s) return;
+          s.exportFormat = e.target.value;
+          document.getElementById("exportResultArea").classList.add("hidden");
+          refreshAllEditorViews();
+        });
+
+        document.getElementById("btnGenerateImage").addEventListener("click", generateHighResImage);
+        document.getElementById("btnDownloadPng").addEventListener("click", downloadGeneratedPng);
+        document.getElementById("btnSharePng").addEventListener("click", shareGeneratedPng);
+        document.getElementById("btnCopyPng").addEventListener("click", copyGeneratedPng);
+        document.getElementById("btnExportSheetJson").addEventListener("click", exportActiveSheetJson);
+
+        // Fechar modal ao tocar fora
+        document.getElementById("customModal").addEventListener("click", (e) => {
+          if (e.target.id === "customModal") closeModal();
+        });
+      }
+
+      /* ======================================================================
+         13. BOOTSTRAP DO APLICATIVO
+         ====================================================================== */
+      window.addEventListener("DOMContentLoaded", () => {
+        loadFromStorage();
+        bindEvents();
+
+        const savedActive = localStorage.getItem(ACTIVE_ID_KEY);
+        if (savedActive && sheets.some(s => s.id === savedActive)) {
+          openEditor(savedActive);
+        } else {
+          renderHome();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
